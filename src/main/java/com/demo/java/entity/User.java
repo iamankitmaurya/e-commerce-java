@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.demo.java.enums.Role;
 import com.demo.java.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -89,6 +90,7 @@ public class User {
     private Boolean enabled;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Product> products;
 
     private Integer failedLoginAttempts;

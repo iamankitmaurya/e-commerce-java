@@ -2,7 +2,6 @@ package com.demo.java.service;
 
 import com.demo.java.dto.LoginRequest;
 import com.demo.java.dto.LoginResponse;
-import com.demo.java.dto.RegisterRequest;
 import com.demo.java.entity.User;
 
 public interface AuthService {
@@ -14,4 +13,6 @@ public interface AuthService {
     LoginResponse refreshToken(String refreshToken);
 
     void logout();
+
+    User getCurrentUser();
 }

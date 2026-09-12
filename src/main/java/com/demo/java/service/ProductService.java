@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.demo.java.entity.Product;
 
 public interface ProductService {
+    List<Product> getMyProducts();
 
     Product saveProduct(Product product);
 
@@ -26,4 +27,5 @@ public interface ProductService {
     List<Product> getProductsByCategory(String category);
 
     List<Product> getProductsByBrand(String brand);
+
 }

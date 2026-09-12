@@ -9,21 +9,25 @@ import com.demo.java.entity.Product;
 import com.demo.java.entity.User;
 import com.demo.java.repository.ProductRepository;
 import com.demo.java.repository.UserRepository;
+import com.demo.java.service.JwtService;
 import com.demo.java.service.ProductService;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private ProductRepository productRepository;
-    private UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Override
     public Product saveProduct(Product product) {
+        Long userId = jwtService.getCurrentUserId();
+        User seller = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
+        product.setUser(seller);
         return productRepository.save(product);
     }
 
@@ -55,7 +59,19 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product Not Found"));
+
+        Long currentSellerId = jwtService.getCurrentUserId();
+
+        if (!product.getUser().getId().equals(currentSellerId)) {
+
+            throw new RuntimeException(
+                    "You can delete only your own product");
+        }
+
+        productRepository.delete(product);
     }
 
     @Override
@@ -85,5 +101,15 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> getProductsByBrand(String brand) {
         return productRepository.findByBrand(brand);
+    }
+
+    @Override
+    public List<Product> getMyProducts() {
+        System.out.println("Current User ID: "); // Debugging line
+        System.out.println("Current User ID: " + jwtService.toString()); // Debugging line
+        Long userId = jwtService.getCurrentUserId();
+        System.out.println("Current User ID: " + userId + jwtService.toString()); // Debugging line
+        return productRepository
+                .findByUserId(7L);
     }
 }

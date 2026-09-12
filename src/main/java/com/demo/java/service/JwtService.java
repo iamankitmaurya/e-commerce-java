@@ -15,4 +15,10 @@ public interface JwtService {
     String extractRole(String token);
 
     boolean validateToken(String token);
+
+    Long getCurrentUserId();
+
+    String getCurrentUserEmail();
+
+    String getCurrentUserRole();
 }

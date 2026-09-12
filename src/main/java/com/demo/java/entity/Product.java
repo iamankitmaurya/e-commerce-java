@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.demo.java.enums.ProductStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,9 +61,10 @@ public class Product {
     private Integer minimumStock;
 
     private Integer soldQuantity;
-    @ManyToOne(fetch = FetchType.LAZY)
 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @Column(unique = true)
