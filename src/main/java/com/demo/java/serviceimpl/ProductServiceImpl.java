@@ -32,11 +32,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product updateProduct(Long id, Product product) {
+    public Product updateProduct(Product product) {
+        Long userId = jwtService.getCurrentUserId();
 
-        Product existingProduct = productRepository.findById(id)
+        Product existingProduct = productRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Product Not Found"));
-
         existingProduct.setProductName(product.getProductName());
         existingProduct.setDescription(product.getDescription());
         existingProduct.setPrice(product.getPrice());
@@ -105,10 +105,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getMyProducts() {
-        System.out.println("Current User ID: "); // Debugging line
-        System.out.println("Current User ID: " + jwtService.toString()); // Debugging line
         Long userId = jwtService.getCurrentUserId();
-        System.out.println("Current User ID: " + userId + jwtService.toString()); // Debugging line
         return productRepository
                 .findByUserId(7L);
     }

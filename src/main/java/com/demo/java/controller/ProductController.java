@@ -73,7 +73,7 @@ public class ProductController {
         }
 
         @GetMapping("/brand/{brand}")
-        @PreAuthorize("hasAnyRole('ADMIN','SELLER','CUSTOMER')")
+        @PreAuthorize("hasAnyRole('CUSTOMER')")
         public ResponseEntity<List<Product>> getByBrand(
                         @PathVariable String brand) {
 
@@ -89,13 +89,12 @@ public class ProductController {
                                 productService.getMyProducts());
         }
 
-        @PutMapping("/{id}")
+        @PutMapping
+        @PreAuthorize("hasRole('SELLER')")
         public ResponseEntity<Product> updateProduct(
-                        @PathVariable Long id,
                         @RequestBody Product product) {
-
                 return ResponseEntity.ok(
-                                productService.updateProduct(id, product));
+                                productService.updateProduct(product));
         }
 
         @DeleteMapping("/{id}")
