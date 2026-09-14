@@ -15,4 +15,6 @@ public interface AuthService {
     void logout();
 
     User getCurrentUser();
+
+    User saveUser(User user);
 }

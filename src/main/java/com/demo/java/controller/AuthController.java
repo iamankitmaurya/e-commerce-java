@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.demo.java.dto.LoginRequest;
 import com.demo.java.dto.LoginResponse;
 import com.demo.java.entity.User;
+import com.demo.java.enums.Role;
+import com.demo.java.enums.UserStatus;
 import com.demo.java.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,14 @@ public class AuthController {
         @PostMapping("/register")
         public ResponseEntity<String> register(
                         @RequestBody User user) {
+                user.setRole(Role.CUSTOMER);
+                user.setStatus(UserStatus.ACTIVE);
+                user.setEmailVerified(false);
+                user.setMobileVerified(false);
+                user.setAccountNonLocked(true);
+                user.setAccountNonExpired(true);
+                user.setCredentialsNonExpired(true);
+                user.setEnabled(true);
 
                 return ResponseEntity
                                 .status(HttpStatus.CREATED)
@@ -35,7 +45,6 @@ public class AuthController {
         @PostMapping("/login")
         public ResponseEntity<LoginResponse> login(
                         @RequestBody LoginRequest request) {
-                System.out.println("dg");
                 return ResponseEntity.ok(
                                 authService.login(request));
         }

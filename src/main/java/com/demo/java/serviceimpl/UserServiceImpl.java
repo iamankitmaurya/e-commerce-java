@@ -47,8 +47,6 @@ public class UserServiceImpl implements UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User Not Found"));
 
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
         existingUser.setFullName(user.getFullName());
         existingUser.setEmail(user.getEmail());
         existingUser.setMobile(user.getMobile());

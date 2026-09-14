@@ -2,6 +2,7 @@ package com.demo.java.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,25 +16,50 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.demo.java.entity.User;
+import com.demo.java.enums.UserStatus;
 import com.demo.java.response.PageResponse;
+import com.demo.java.service.AuthService;
 import com.demo.java.service.UserService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/users")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    // @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<String> createUser(@RequestBody User user) {
+        user.setStatus(UserStatus.ACTIVE);
+        user.setEmailVerified(false);
+        user.setMobileVerified(false);
+        user.setAccountNonLocked(true);
+        user.setAccountNonExpired(true);
+        user.setCredentialsNonExpired(true);
+        user.setEnabled(true);
+        user.setFailedLoginAttempts(0);
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(user));
+    }
+
+    @PostMapping("/seller-or-admin")
+    public ResponseEntity<User> createUserSellerOrAdmin(@RequestBody User user) {
+        user.setStatus(UserStatus.ACTIVE);
+        user.setEmailVerified(false);
+        user.setMobileVerified(false);
+        user.setAccountNonLocked(true);
+        user.setAccountNonExpired(true);
+        user.setCredentialsNonExpired(true);
+        user.setEnabled(true);
+        user.setFailedLoginAttempts(0);
         return ResponseEntity.ok(userService.saveUser(user));
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
+    // @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }

@@ -34,7 +34,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product updateProduct(Product product) {
         Long userId = jwtService.getCurrentUserId();
-
         Product existingProduct = productRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Product Not Found"));
         existingProduct.setProductName(product.getProductName());
@@ -107,6 +106,6 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getMyProducts() {
         Long userId = jwtService.getCurrentUserId();
         return productRepository
-                .findByUserId(7L);
+                .findByUserId(userId);
     }
 }

@@ -1,7 +1,10 @@
 package com.demo.java.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -12,6 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.demo.java.security.JwtAuthenticationFilter;
 
@@ -22,54 +28,99 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(
+                        HttpSecurity http) throws Exception {
 
-        http
+                http
+                                // Disable CSRF because we are using JWT
+                                .csrf(csrf -> csrf.disable())
 
-                .csrf(csrf -> csrf.disable())
+                                // Enable CORS
+                                .cors(Customizer.withDefaults())
 
-                .cors(Customizer.withDefaults())
+                                // JWT based application - no session
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(
+                                                                SessionCreationPolicy.STATELESS))
 
-                .sessionManagement(session -> session.sessionCreationPolicy(
-                        SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
 
-                .authorizeHttpRequests(auth -> auth
+                                                // Allow CORS preflight request
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**")
+                                                .permitAll()
 
-                        // Public APIs
-                        .requestMatchers(
-                                "/api/auth/**")
-                        .permitAll()
+                                                .requestMatchers("/api/auth/**")
+                                                .permitAll()
 
-                        .requestMatchers(
-                                "/api/users/register")
-                        .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/users/all")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/users")
+                                                .permitAll()
 
-                        // Everything else secured
-                        .anyRequest()
-                        .authenticated())
+                                                // Everything else requires JWT
+                                                .anyRequest()
+                                                .authenticated())
 
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                                // JWT Filter
+                                .addFilterBefore(
+                                                jwtAuthenticationFilter,
+                                                UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
+        // Password Encoder
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-        return new BCryptPasswordEncoder();
-    }
+        // Authentication Manager
+        @Bean
+        public AuthenticationManager authenticationManager(
+                        AuthenticationConfiguration configuration)
+                        throws Exception {
 
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration)
-            throws Exception {
+                return configuration.getAuthenticationManager();
+        }
 
-        return configuration.getAuthenticationManager();
-    }
+        // =========================
+        // CORS CONFIGURATION
+        // =========================
+
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+
+                CorsConfiguration configuration = new CorsConfiguration();
+
+                // React frontend
+                configuration.setAllowedOrigins(List.of(
+                                "http://localhost:5173"));
+
+                // HTTP methods
+                configuration.setAllowedMethods(List.of(
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "DELETE",
+                                "PATCH",
+                                "OPTIONS"));
+
+                // Request headers
+                configuration.setAllowedHeaders(List.of("*"));
+
+                // Allow Authorization header / credentials
+                configuration.setAllowCredentials(true);
+
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+                source.registerCorsConfiguration(
+                                "/**",
+                                configuration);
+
+                return source;
+        }
 }
